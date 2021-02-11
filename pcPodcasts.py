@@ -13,6 +13,7 @@
     # multithreading and ability to pause or cancel
     # code template- blank python script
     # need to close files?
+    # request to download now or wait till later?
 
 import requests
 import pdb
@@ -32,10 +33,11 @@ def pcPodcasts():
 
     for item in item_list:
         title = item.title.text + '.mp3'
-        if title.find('/'):
+        if title.find('/') | title.find('"'):
             title = title.replace('/', ',')
+            title = title.replace('"', "'")
         if title in files:
-             break
+             continue
         print('Downloading ' + title, flush=True)
         mp3_url = item.enclosure.get('url')
         mp3 = requests.get(mp3_url)
