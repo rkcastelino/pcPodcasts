@@ -10,7 +10,9 @@
     # function structure
     # comments
     # trigger download via email reception
-
+    # multithreading and ability to pause or cancel
+    # code template- blank python script
+    # need to close files?
 
 import requests
 import pdb
@@ -32,10 +34,12 @@ def pcPodcasts():
         title = item.title.text + '.mp3'
         if title.find('/'):
             title = title.replace('/', ',')
-        # if title in files:
-        #     break
+        if title in files:
+             break
+        print('Downloading ' + title, flush=True)
         mp3_url = item.enclosure.get('url')
         mp3 = requests.get(mp3_url)
+        print('Successfully downloaded!', flush=True)
         with open('Episodes/' + title, 'wb') as f:
             f.write(mp3.content)
 
