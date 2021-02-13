@@ -64,23 +64,27 @@ def syncEpisodes(item_list, files):
              continue
 
         # Start status printing to command line
-        downloadingAnimationThread = threading.Thread(target = downloadingAnimation, args=(title[:-4],))
+        stop_animation_flag = False
+        downloadingAnimationThread = threading.Thread(target = downloadingAnimation, args=(title[:-4], lambda : stop_animation_flag))
         downloadingAnimationThread.start()
 
         # Get specific url, download and save mp3
         mp3_url = item.enclosure.get('url')
         mp3 = requests.get(mp3_url)
+        stop_animation_flag = True
         downloadingAnimationThread.join()
-        print('Successfully downloaded!', flush=True)       #flush required since using GitBash as primary terminal
         with open('Episodes/' + title, 'wb') as f:
             f.write(mp3.content)
 
-def downloadingAnimation(title):
+def downloadingAnimation(title, stop_animation_flag):
     animation = ["      ", " .    ", " . .  ", " . . ."]
     idx = 0
     while True:
-        print('Downloading "' + title + '"' + animation[idx % len(animation)], end="\r", flush=True)
+        print('Downloading "' + title + '"' + animation[idx % len(animation)], end="\r", flush=True)        # Flush is required since using GitBash as terminal
         idx += 1
+        if stop_animation_flag():
+            print('Downloaded "' + title + '"      ', flush=True)
+            break
         time.sleep(1)
 
 
