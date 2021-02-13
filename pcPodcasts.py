@@ -24,6 +24,7 @@
     # move ToDos to new file
     # set up local git repo
     # add images/gifs to documentation
+    # had animation issue with "[No Ads] Ep. 15 - 8 Simple Rules for Dadding my Teenage Paeden" since exceeded line limit, wrote to new line everytime, will probably now need to use curses
 
 import requests
 import pdb
@@ -83,7 +84,7 @@ def downloadingAnimation(title, stop_animation_flag):
         print('Downloading "' + title + '"' + animation[idx % len(animation)], end="\r", flush=True)        # Flush is required since using GitBash as terminal
         idx += 1
         if stop_animation_flag():
-            print('Downloaded "' + title + '"      ', flush=True)
+            print('Downloaded "' + title + '"       ', flush=True)              # Need spaces at end to overwite periods
             break
         time.sleep(1)
 
