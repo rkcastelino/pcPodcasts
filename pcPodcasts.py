@@ -71,11 +71,13 @@ def syncEpisodes(item_list, files):
 
         # Get specific url, download and save mp3
         mp3_url = item.enclosure.get('url')
-        mp3 = requests.get(mp3_url)
         stop_animation_flag = True
         downloadingAnimationThread.join()
         with open('Episodes/' + title, 'wb') as f:
             f.write(mp3.content)
+
+def download():
+    mp3 = requests.get(mp3_url)
 
 def downloadingAnimation(title, stop_animation_flag):
     animation = ["      ", " .    ", " . .  ", " . . ."]
