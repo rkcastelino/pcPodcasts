@@ -129,4 +129,4 @@ dmypy.json
 .pyre/
 
 # Private Patreon Media
-.mp3
+*.mp3
