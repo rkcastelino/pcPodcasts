@@ -29,7 +29,6 @@
 import requests
 import pdb
 import os
-import sys
 import threading, queue
 from bs4 import BeautifulSoup as Soup
 import time
@@ -73,23 +72,35 @@ def downloading(item_list, files):
 
         # Get specific url, download and save mp3
         mp3_url = item.enclosure.get('url')
-        #title_queue.put(title[:-4])
+        title_queue.put(title[:-4])
         mp3 = requests.get(mp3_url)
-        print('got here')
-        #title_queue.put('done')
+        title_queue.put('done')
         with open('Episodes/' + title, 'wb') as f:
             f.write(mp3.content)
+    title_queue.put('all done')
 
 def downloadingAnimation():
     animation = ["      ", " .    ", " . .  ", " . . ."]
     idx = 0
-    title = "none"
-    # while True:
-    #     try:
-    #         title = title_queue.get()
-    #         print(title)
-    #     except Queue.Empty:
-    #         print('here')
+    title = 'none'
+
+    while True:
+        try:
+            title = title_queue.get(False)
+            if title == 'done':
+                print('Downloaded "' + title + '"       ', flush=True)              # Need spaces at end to overwite periods
+                idx = 0
+                continue
+            if title=='all done':
+                break
+
+            print('Downloading "' + title + '"' + animation[idx % len(animation)], end="\r", flush=True)        # Flush is required since using GitBash as terminal
+        except queue.Empty:
+            print('Downloading "' + title + '"' + animation[idx % len(animation)], end="\r", flush=True)        # Flush is required since using GitBash as terminal
+            idx += 1
+            time.sleep(1)
+            pass
+
 
 
 
@@ -110,9 +121,8 @@ def main():
     downloadingAnimationThread = threading.Thread(target = downloadingAnimation)
 
     downloadingThread.start()
-    #downloadingAnimationThread.start()
+    downloadingAnimationThread.start()
 
 if __name__ == "__main__":
     title_queue = queue.Queue()
-    sys.stdout.flush()
     main()
