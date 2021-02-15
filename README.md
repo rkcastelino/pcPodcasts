@@ -19,4 +19,4 @@ I use my phone primarily for music/podcast consumption but wanted to reduce the,
 -   Installed requests, os, beautifulsoup4
 
 ### Usage:
-   Run pcPodcasts.py!
+   Run pcPodcasts.py! Type q to exit if need be.
