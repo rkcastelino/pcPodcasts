@@ -34,6 +34,7 @@ import threading, queue
 from bs4 import BeautifulSoup as Soup
 import time
 import keyboard
+from win32gui import GetWindowText, GetForegroundWindow
 
 def setup():
     # Get rss-xml file from Pat        reon link
@@ -57,8 +58,14 @@ def setup():
 
 def monitor():
     while True:  # making a loop
+        current_window = (GetWindowText(GetForegroundWindow()))
+        try:
+            current_window = current_window[-10:]
+        except:
+            pass
+        
         try:  # used try so that if user pressed other than the given key error will not be shown
-            if keyboard.is_pressed('q'):  # if key 'q' is pressed
+            if keyboard.is_pressed('q') and current_window == 'pcPodcasts':  # if key 'q' is pressed
                 quit_queue.put('quit')
                 break  # finishing the loop
         except:
@@ -103,7 +110,7 @@ def downloadingAnimation():
             title = title_queue.get(False)
 
             if one_cycle_done == 1:
-                print('Downloaded "' + old_title + '"       ', flush=True)              # Need spaces at end to overwite periods
+                print('Downloaded "' + old_title + '"        ', flush=True)              # Need spaces at end to overwite periods
                 idx = 0
 
             if title=='all done':
