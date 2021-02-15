@@ -29,7 +29,8 @@
 import requests
 import pdb
 import os
-import threading
+import sys
+import threading, queue
 from bs4 import BeautifulSoup as Soup
 import time
 
@@ -53,48 +54,65 @@ def setup():
 
     return item_list, files
 
-def syncEpisodes(item_list, files):
+def monitor():
+    x = 3
+
+
+def downloading(item_list, files):
     for item in item_list:
+
         title = item.title.text + '.mp3'
         # Test if title has characters which break file naming
         if title.find('/') | title.find('"'):
             title = title.replace('/', ',')
             title = title.replace('"', "'")
+
         # Skip file if already downloaded
         if title in files:
              continue
 
-        # Start status printing to command line
-        stop_animation_flag = False
-        downloadingAnimationThread = threading.Thread(target = downloadingAnimation, args=(title[:-4], lambda : stop_animation_flag))
-        downloadingAnimationThread.start()
-
         # Get specific url, download and save mp3
         mp3_url = item.enclosure.get('url')
-        stop_animation_flag = True
-        downloadingAnimationThread.join()
+        #title_queue.put(title[:-4])
+        mp3 = requests.get(mp3_url)
+        print('got here')
+        #title_queue.put('done')
         with open('Episodes/' + title, 'wb') as f:
             f.write(mp3.content)
 
-def download():
-    mp3 = requests.get(mp3_url)
-
-def downloadingAnimation(title, stop_animation_flag):
+def downloadingAnimation():
     animation = ["      ", " .    ", " . .  ", " . . ."]
     idx = 0
-    while True:
-        print('Downloading "' + title + '"' + animation[idx % len(animation)], end="\r", flush=True)        # Flush is required since using GitBash as terminal
-        idx += 1
-        if stop_animation_flag():
-            print('Downloaded "' + title + '"       ', flush=True)              # Need spaces at end to overwite periods
-            break
-        time.sleep(1)
+    title = "none"
+    # while True:
+    #     try:
+    #         title = title_queue.get()
+    #         print(title)
+    #     except Queue.Empty:
+    #         print('here')
+
+
+
+        # if title != "none":
+        #     print('here')
+        #     print('Downloading "' + title + '"' + animation[idx % len(animation)], end="\r", flush=True)        # Flush is required since using GitBash as terminal
+        #     idx += 1
+        #     time.sleep(1)
+
+#make sure to reset idx with new title as well
 
 
 def main():
     item_list, files = setup()
-    syncEpisodesThread = threading.Thread(target = syncEpisodes, args=(item_list, files))
-    syncEpisodesThread.start()
+
+    monitorThread = threading.Thread(target = monitor)
+    downloadingThread = threading.Thread(target = downloading, args=(item_list, files))
+    downloadingAnimationThread = threading.Thread(target = downloadingAnimation)
+
+    downloadingThread.start()
+    #downloadingAnimationThread.start()
 
 if __name__ == "__main__":
+    title_queue = queue.Queue()
+    sys.stdout.flush()
     main()
