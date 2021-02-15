@@ -1,0 +1,25 @@
+#TO DO:
+    # status files
+    # test and exceptions?
+    # what else need in file other than title? pics?
+    # valid title names and other test cases
+    # how do podcasts apps determine new content?
+    # make directory if doesn't exist
+    # function structure
+    # trigger download via email reception
+    # multithreading and ability to pause or cancel
+    # code template- blank python script
+    # request to download now or wait till later?
+    # generalize away from dndads
+    # make folder named based on specific podcast?
+    # function commenting
+    # test function which removes episodes to resync, test cases in general?
+    # note that uses threding even if already used
+    # remove pdb dependency?
+    # functions listed on ReadMe.md
+    # intro when first run script?
+    # cost to constnatly reprint
+    # move ToDos to new file
+    # add images/gifs to documentation
+    # had animation issue with "[No Ads] Ep. 15 - 8 Simple Rules for Dadding my Teenage Paeden" since exceeded line limit, wrote to new line everytime, will probably now need to use curses
+    # aknowledging going to quit, more immediate quit, neater command line
