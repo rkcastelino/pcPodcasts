@@ -7,18 +7,24 @@ import keyboard
 from win32gui import GetWindowText, GetForegroundWindow
 import csv
 import pdb
+import json
 
 def setup():
     #Load file
-    with open('PodcastURLs.csv', newline="") as PodcastURLs:
-        url_list = PodcastURLs.readlines()
+    with open('PodcastURLs.json', 'r') as f:
+        url_list = json.loads(f.read())
 
-    pdb.set_trace()
     #Display titles and list option select
-
+    print('\n')
+    print("Podcasts on record: ")
+    for idx, podcast in enumerate(url_list):
+        print(f'{idx} {podcast["title"]}')
+    #print(f"{idx+1}: All feeds")
+    print('\n')
+    selected_podcast = input('Select podcast to sync: ')
 
     # Get rss-xml file from Patreon link
-    rss_url = "https://audioboom.com/channels/4972737.rss"
+    rss_url = url_list[int(selected_podcast)]['url']
     rss_xml = requests.get(rss_url)
     soup = Soup(rss_xml.text, features="xml")
 
@@ -76,7 +82,6 @@ def downloading(podcast, item_list, files):
 
             # Get specific url, download and save mp3
             mp3_url = item.enclosure.get('url')
-            print(mp3_url)
             title_queue.put(title[:-4])
             mp3 = requests.get(mp3_url)
             with open('DownloadedPodcasts/' + podcast + '/' + title, 'wb') as f:
@@ -99,6 +104,7 @@ def downloadingAnimation():
                 idx = 0
 
             if title=='all done':
+                print('All episodes synced!')
                 break
 
             print('Downloading "' + title + '"' + animation[idx % len(animation)], end="\r", flush=True) # Flush is required since using GitBash as terminal
