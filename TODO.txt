@@ -23,3 +23,4 @@
     # add images/gifs to documentation
     # had animation issue with "[No Ads] Ep. 15 - 8 Simple Rules for Dadding my Teenage Paeden" since exceeded line limit, wrote to new line everytime, will probably now need to use curses
     # aknowledging going to quit, more immediate quit, neater command line
+    # doesn't work with another test case, gus and eddy

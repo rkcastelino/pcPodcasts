@@ -5,11 +5,20 @@ from bs4 import BeautifulSoup as Soup
 import time
 import keyboard
 from win32gui import GetWindowText, GetForegroundWindow
+import csv
 import pdb
 
 def setup():
-    # Get rss-xml file from Pat        reon link
-    rss_url = "https://www.patreon.com/rss/dungeonsanddads?auth=71IdjlaUs5U0s9MOuTGm5HMDVFXxNefC"
+    #Load file
+    with open('PodcastURLs.csv', newline="") as PodcastURLs:
+        url_list = PodcastURLs.readlines()
+
+    pdb.set_trace()
+    #Display titles and list option select
+
+
+    # Get rss-xml file from Patreon link
+    rss_url = "https://audioboom.com/channels/4972737.rss"
     rss_xml = requests.get(rss_url)
     soup = Soup(rss_xml.text, features="xml")
 
@@ -67,6 +76,7 @@ def downloading(podcast, item_list, files):
 
             # Get specific url, download and save mp3
             mp3_url = item.enclosure.get('url')
+            print(mp3_url)
             title_queue.put(title[:-4])
             mp3 = requests.get(mp3_url)
             with open('DownloadedPodcasts/' + podcast + '/' + title, 'wb') as f:
