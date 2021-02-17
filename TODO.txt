@@ -24,4 +24,14 @@
     # had animation issue with "[No Ads] Ep. 15 - 8 Simple Rules for Dadding my Teenage Paeden" since exceeded line limit, wrote to new line everytime, will probably now need to use curses
     # aknowledging going to quit, more immediate quit, neater command line
     # doesn't work with another test case, gus and eddy
-    # permitted podcast selection
+    # permitted podcast selection and valid inputs
+    # start building custom exceptions
+    # thread/pipe diagram
+    # keep up commenting
+    # explain quit functionality/intro to script?
+    # reaching point at which should probably modularize
+    # make select operation match
+    # downloading animation for crud
+    # comment about leaving out json
+    # how deal with print_feeds, don't forget input (to sync) changes
+    # delete multiple

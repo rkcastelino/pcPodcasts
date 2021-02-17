@@ -8,12 +8,20 @@ from win32gui import GetWindowText, GetForegroundWindow
 import csv
 import pdb
 import json
+import sys
 
-def setup():
-    #Load file
-    with open('PodcastURLs.json', 'r') as f:
-        url_list = json.loads(f.read())
+def get_title(url):
+    # Get rss-xml file from Patreon link
+    rss_xml = requests.get(url)
+    soup = Soup(rss_xml.text, features="xml")
 
+    # Podcast name
+    title = soup.findAll('title')[0].string
+
+    return title, soup
+
+
+def print_feeds(url_list):
     #Display titles and list option select
     print('\n')
     print("Podcasts on record: ")
@@ -21,29 +29,37 @@ def setup():
         print(f'{idx} {podcast["title"]}')
     #print(f"{idx+1}: All feeds")
     print('\n')
-    selected_podcast = input('Select podcast to sync: ')
+    selected_podcast = int(input('Select podcast to sync: '))
 
-    # Get rss-xml file from Patreon link
-    rss_url = url_list[int(selected_podcast)]['url']
-    rss_xml = requests.get(rss_url)
-    soup = Soup(rss_xml.text, features="xml")
+    return selected_podcast
 
-    # Podcast name
-    podcast = soup.findAll('title')[0].string
+def setup():
+    #Load file
+    with open('PodcastURLs.json', 'r') as f:
+        data = f.read()
+        try:
+            url_list = json.loads(data)
+        except:
+            print('No RSS feeds on record, please add one to continue!')
+            sys.exit()
+
+    selected_podcast = print_feeds(url_list)
+    title, soup = get_title(url_list[selected_podcast]['url'])
 
     # Make directory to save episodes to if doesn't already exist
-    if not os.path.exists('DownloadedPodcasts/' + podcast):
-        os.makedirs('DownloadedPodcasts/' + podcast)
+    if not os.path.exists('DownloadedPodcasts/' + title):
+        os.makedirs('DownloadedPodcasts/' + title)
 
     # Check all episodes currently downloaded
-    for root, dirs, files in os.walk("./DownloadedPodcasts/" + podcast):
+    for root, dirs, files in os.walk("./DownloadedPodcasts/" + title):
         for filename in files:
             continue
 
     # Get each item in feed and iterate through
     item_list = soup.findAll('item')
 
-    return podcast, item_list, files
+    return title, item_list, files
+
 
 def monitor():
     while True:
@@ -61,34 +77,32 @@ def monitor():
 
             # Quit if right keypress and was in correct window
             if keyboard.is_pressed('q') and current_window == 'pcPodcasts':
-                quit_queue.put('quit')
+                sys.exit()
                 break
 
-def downloading(podcast, item_list, files):
+
+def downloading(podcast_title, item_list, files):
     for item in item_list:
-        try:
-            quit_flag = quit_queue.get(False)
-            break
-        except queue.Empty:
-            title = item.title.text + '.mp3'
-            # Test if title has characters which break file naming
-            if title.find('/') | title.find('"'):
-                title = title.replace('/', ',')
-                title = title.replace('"', "'")
+        title = item.title.text + '.mp3'    # Title from here on out refers to episode title
+        # Test if title has characters which break file naming
+        if title.find('/') | title.find('"'):
+            title = title.replace('/', ',')
+            title = title.replace('"', "'")
 
-            # Skip file if already downloaded
-            if title in files:
-                 continue
+        # Skip file if already downloaded
+        if title in files:
+             continue
 
-            # Get specific url, download and save mp3
-            mp3_url = item.enclosure.get('url')
-            title_queue.put(title[:-4])
-            mp3 = requests.get(mp3_url)
-            with open('DownloadedPodcasts/' + podcast + '/' + title, 'wb') as f:
-                f.write(mp3.content)
+        # Get specific url, download and save mp3
+        mp3_url = item.enclosure.get('url')
+        title_queue.put(title[:-4])
+        mp3 = requests.get(mp3_url)
+        with open('DownloadedPodcasts/' + podcast_title + '/' + title, 'wb') as f:
+            f.write(mp3.content)
 
     title_queue.put('all done')
     monitor_queue.put('quit')
+
 
 def downloadingAnimation():
     animation = ["      ", " .    ", " . .  ", " . . ."]
@@ -117,19 +131,66 @@ def downloadingAnimation():
             one_cycle_done = 1
             pass
 
-def main():
-    podcast, item_list, files = setup()
 
-    monitorThread = threading.Thread(target = monitor)
-    downloadingThread = threading.Thread(target = downloading, args=(podcast, item_list, files))
+def crud():
+    operation_choice = int(input("""Select operation:
+    0 Add feed
+    1 Remove feed
+
+    > """))
+
+    if operation_choice == 0:
+        with open('PodcastURLs.json', 'r') as f:
+            data = f.read()
+            url_list = json.loads(data)
+
+        url = input("Paste RSS url: ")
+        title, soup = get_title(url)
+        url_list.append({'title':title, 'url':url})
+
+        with open('PodcastURLs.json', 'w') as f:
+            json.dump(url_list,f)
+
+    elif operation_choice == 1:
+        with open('PodcastURLs.json', 'r') as f:
+            data = f.read()
+            url_list = json.loads(data)
+
+        selected_podcast = print_feeds(url_list)
+        del url_list[selected_podcast]
+        with open('PodcastURLs.json', 'w') as f:
+            json.dump(url_list,f)
+
+
+def sync():
+    title, item_list, files = setup()
+
+    downloadingThread = threading.Thread(target = downloading, args=(title, item_list, files))
     downloadingAnimationThread = threading.Thread(target = downloadingAnimation)
 
-    monitorThread.start()
     downloadingThread.start()
     downloadingAnimationThread.start()
 
+
+def main():
+    monitorThread = threading.Thread(target = monitor)
+    monitorThread.start()
+
+    while True:
+        operation_choice = input("""Select operation:
+        0 Add/remove podcast feed
+        1 Synchronize podcast
+
+        > """)
+
+        if int(operation_choice) == 0:
+            crud()
+        elif int(operation_choice) == 1:
+            sync()
+        input("Press enter to continue or q to exit.")
+
+
 if __name__ == "__main__":
     title_queue = queue.Queue()
-    quit_queue = queue.Queue()
     monitor_queue = queue.Queue()
     main()
