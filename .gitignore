@@ -130,3 +130,4 @@ dmypy.json
 
 # Private Patreon Media
 *.mp3
+PodcastURLs.json
