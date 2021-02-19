@@ -1,14 +1,10 @@
 import requests
-import os
+import os, json, sys, time
 import threading, queue
-from bs4 import BeautifulSoup as Soup
-import time
 import keyboard
+from bs4 import BeautifulSoup as Soup
 from win32gui import GetWindowText, GetForegroundWindow
-import csv
 import pdb
-import json
-import sys
 
 def get_title(url):
     # Get rss-xml file from Patreon link
@@ -62,24 +58,21 @@ def setup():
 
 
 def monitor():
+    print('running')
     while True:
+        # Check to make sure terminal in focus and not detecting background keypress
+        current_window = (GetWindowText(GetForegroundWindow()))
         try:
-            monitor_queue.get(False)
-            break
+            # Just extract last characters which should be primary directory
+            current_window = current_window[-10:]
         except:
-            # Check to make sure terminal in focus and not detecting background keypress
-            current_window = (GetWindowText(GetForegroundWindow()))
-            try:
-                # Just extract last characters which should be primary directory
-                current_window = current_window[-10:]
-            except:
-                pass
+            pass
 
-            # Quit if right keypress and was in correct window
-            if keyboard.is_pressed('q') and current_window == 'pcPodcasts':
-                sys.exit()
-                break
-
+        # Quit if right keypress and was in correct window
+        if keyboard.is_pressed('q') and current_window == 'pcPodcasts':
+            sys.exit()
+            break
+    print('dying')
 
 def downloading(podcast_title, item_list, files):
     for item in item_list:
@@ -101,7 +94,6 @@ def downloading(podcast_title, item_list, files):
             f.write(mp3.content)
 
     title_queue.put('all done')
-    monitor_queue.put('quit')
 
 
 def downloadingAnimation():
@@ -192,5 +184,4 @@ def main():
 
 if __name__ == "__main__":
     title_queue = queue.Queue()
-    monitor_queue = queue.Queue()
     main()

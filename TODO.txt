@@ -1,4 +1,11 @@
 #TO DO:
+    # gus and eddy troubleshooting
+    # arg parse
+    # web connection
+    # routing thru tree/exceptions/general bug fixes
+    # metadata like pics/descriptions
+
+
     # status files
     # test and exceptions?
     # what else need in file other than title? pics?
@@ -35,3 +42,4 @@
     # comment about leaving out json
     # how deal with print_feeds, don't forget input (to sync) changes
     # delete multiple
+    # catch permitted inputs
