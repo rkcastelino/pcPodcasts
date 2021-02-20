@@ -5,6 +5,9 @@ import keyboard
 from bs4 import BeautifulSoup as Soup
 from win32gui import GetWindowText, GetForegroundWindow
 import pdb
+from multiprocessing import Process, Pipe
+# remove pipe if don't need
+# remove threading/queue if don't need
 
 def get_title(url):
     # Get rss-xml file from Patreon link
@@ -58,7 +61,6 @@ def setup():
 
 
 def monitor():
-    print('running')
     while True:
         # Check to make sure terminal in focus and not detecting background keypress
         current_window = (GetWindowText(GetForegroundWindow()))
@@ -72,7 +74,6 @@ def monitor():
         if keyboard.is_pressed('q') and current_window == 'pcPodcasts':
             sys.exit()
             break
-    print('dying')
 
 def downloading(podcast_title, item_list, files):
     for item in item_list:
@@ -159,15 +160,13 @@ def sync():
 
     downloadingThread = threading.Thread(target = downloading, args=(title, item_list, files))
     downloadingAnimationThread = threading.Thread(target = downloadingAnimation)
+    monitorThread = threading.Thread(target = monitor)
 
     downloadingThread.start()
     downloadingAnimationThread.start()
-
-
-def main():
-    monitorThread = threading.Thread(target = monitor)
     monitorThread.start()
 
+def main():
     while True:
         operation_choice = input("""Select operation:
         0 Add/remove podcast feed
