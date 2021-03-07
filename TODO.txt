@@ -43,3 +43,24 @@
     # how deal with print_feeds, don't forget input (to sync) changes
     # delete multiple
     # catch permitted inputs
+
+    basic header format for files
+
+    check out good examples of CLIs
+    custom input where just print and then wait for keypress?
+    what else is needed to make this something i would actually use
+
+    quit functionality not working
+    permitted inputs
+    rerouting if not functionality want
+
+    set up command line arg parsing
+
+    have to quit out neatly, not abruptly
+
+    implement threads for downloading at least? for faster bulk syncing
+
+    don't use raw input, use wait on keypress?
+
+    remove patreon feed from git history?
+    check out other python github repositories
