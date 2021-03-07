@@ -58,45 +58,50 @@ def setup():
 
 
 def monitor():
-    print('running')
     while True:
-        # Check to make sure terminal in focus and not detecting background keypress
-        current_window = (GetWindowText(GetForegroundWindow()))
         try:
-            # Just extract last characters which should be primary directory
-            current_window = current_window[-10:]
-        except:
-            pass
-
-        # Quit if right keypress and was in correct window
-        if keyboard.is_pressed('q') and current_window == 'pcPodcasts':
-            print('detected')
-            sys.exit()
+            monitor_queue.get(False)
             break
-    print('dying')
+        except:
+            # Check to make sure terminal in focus and not detecting background keypress
+            current_window = (GetWindowText(GetForegroundWindow()))
+            try:
+                # Just extract last characters which should be primary directory
+                current_window = current_window[-10:]
+            except:
+                pass
+
+            # Quit if right keypress and was in correct window
+            if keyboard.is_pressed('q') and current_window == 'pcPodcasts':
+                quit_queue.put('quit')
 
 def downloading(podcast_title, item_list, files):
     for item in item_list:
-        title = item.title.text + '.mp3'    # Title from here on out refers to episode title
-        # Test if title has characters which break file naming
-        if title.find('/') | title.find('"'):
-            title = title.replace('/', ',')
-            title = title.replace('"', "'")
-            title = title.replace(':', ",")
-            title = title.replace('?', "")
+        try:
+            quit_flag = quit_queue.get(False)
+            break
+        except queue.Empty:
+            title = item.title.text + '.mp3'    # Title from here on out refers to episode title
+            # Test if title has characters which break file naming
+            if title.find('/') | title.find('"'):
+                title = title.replace('/', ',')
+                title = title.replace('"', "'")
+                title = title.replace(':', ",")
+                title = title.replace('?', "")
 
-        # Skip file if already downloaded
-        if title in files:
-             continue
+            # Skip file if already downloaded
+            if title in files:
+                 continue
 
-        # Get specific url, download and save mp3
-        mp3_url = item.enclosure.get('url')
-        title_queue.put(title[:-4])
-        mp3 = requests.get(mp3_url)
-        with open('DownloadedPodcasts/' + podcast_title + '/' + title, 'wb') as f:
-            f.write(mp3.content)
+            # Get specific url, download and save mp3
+            mp3_url = item.enclosure.get('url')
+            title_queue.put(title[:-4])
+            mp3 = requests.get(mp3_url)
+            with open('DownloadedPodcasts/' + podcast_title + '/' + title, 'wb') as f:
+                f.write(mp3.content)
 
     title_queue.put('all done')
+    monitor_queue.put('quit')
 
 
 def downloadingAnimation():
@@ -187,4 +192,6 @@ def main():
 
 if __name__ == "__main__":
     title_queue = queue.Queue()
+    quit_queue = queue.Queue()
+    monitor_queue = queue.Queue()
     main()
