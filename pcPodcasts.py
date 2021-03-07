@@ -70,6 +70,7 @@ def monitor():
 
         # Quit if right keypress and was in correct window
         if keyboard.is_pressed('q') and current_window == 'pcPodcasts':
+            print('detected')
             sys.exit()
             break
     print('dying')
@@ -81,6 +82,8 @@ def downloading(podcast_title, item_list, files):
         if title.find('/') | title.find('"'):
             title = title.replace('/', ',')
             title = title.replace('"', "'")
+            title = title.replace(':', ",")
+            title = title.replace('?', "")
 
         # Skip file if already downloaded
         if title in files:
